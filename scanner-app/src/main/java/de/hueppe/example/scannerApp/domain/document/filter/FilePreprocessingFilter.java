@@ -1,6 +1,5 @@
-package de.hueppe.example.scannerApp.domain.validation.filter;
+package de.hueppe.example.scannerApp.domain.document.filter;
 
-import de.hueppe.example.scannerApp.messaging.KafkaDocumentConsumer;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
@@ -15,15 +14,15 @@ import java.util.List;
 @Slf4j
 @Order(1)
 @Component
-public class FilePathPreprocessingFilter implements DocumentPreprocessingFilter {
+public class FilePreprocessingFilter implements DocumentPreprocessingFilter {
 
   public static final List<String> FILE_EXTENSION_WHITELIST = List.of("pdf", "txt");
   private static final String BASE_PATH = "testData/";
 
   @Override
-  public boolean validate(KafkaDocumentConsumer.CheckDocumentEvent event) {
-    return isFileTypeAcceptable(event.fileType(), event.url())
-        && isValidFilePath(event.url());
+  public boolean validate(String fileType, String url) {
+    return isFileTypeAcceptable(fileType, url)
+        && isValidFilePath(url);
   }
 
   private boolean isFileTypeAcceptable(String fileType, String url) {

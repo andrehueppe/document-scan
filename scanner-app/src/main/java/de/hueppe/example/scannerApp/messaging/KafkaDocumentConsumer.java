@@ -14,11 +14,9 @@ public class KafkaDocumentConsumer {
 
     private final ApplicationEventPublisher eventPublisher;
 
-    @KafkaListener(topics = "demo-documents-v1", groupId = "scanner-group")
+    @KafkaListener(topics = "${kafka.topics.documents.v1}", groupId = "${kafka.group}")
     public void consumeDocument(CheckEvent event) {
       log.info("Received document event: {}", event);
-      eventPublisher.publishEvent(new CheckDocumentEvent(event.getFileType(), event.getUrl()));
+      eventPublisher.publishEvent(new CheckEvent(event.getUrl(), event.getFileType()));
     }
-
-    public record CheckDocumentEvent(String fileType, String url) {};
 }

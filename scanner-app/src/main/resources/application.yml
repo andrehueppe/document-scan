@@ -1,0 +1,5 @@
+kafka:
+  group: scanner-group
+  topics:
+    documents:
+      v1: demo-documents-v1
