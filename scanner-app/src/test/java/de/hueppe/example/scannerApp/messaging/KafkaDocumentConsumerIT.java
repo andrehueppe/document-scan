@@ -24,7 +24,7 @@ class KafkaDocumentConsumerIT {
   private KafkaDocumentConsumer kafkaDocumentConsumer;
 
   @Test
-  void testDocumentEventConsumptionAndHandling() {
+  void should_handle_incoming_event() {
     CheckEvent event = new CheckEvent("http://example.com/file.pdf", "PDF");
     kafkaDocumentConsumer.consumeDocument(event);
 

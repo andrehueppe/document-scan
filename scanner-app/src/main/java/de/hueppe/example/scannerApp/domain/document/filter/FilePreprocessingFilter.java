@@ -1,14 +1,14 @@
 package de.hueppe.example.scannerApp.domain.document.filter;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.tika.Tika;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.InvalidPathException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.List;
 
 @Slf4j
@@ -16,20 +16,25 @@ import java.util.List;
 @Component
 public class FilePreprocessingFilter implements DocumentPreprocessingFilter {
 
-  public static final List<String> FILE_EXTENSION_WHITELIST = List.of("pdf", "txt");
+  public static final List<String> FILE_EXTENSION_WHITELIST = List.of("application/pdf");
   private static final String BASE_PATH = "testData/";
+
+  private File loadedFile;
 
   @Override
   public boolean validate(String fileType, String url) {
-    return isFileTypeAcceptable(fileType, url)
-        && isValidFilePath(url);
+    return isValidFilePath(url)
+        && isFileTypeAcceptable(fileType);
   }
 
-  private boolean isFileTypeAcceptable(String fileType, String url) {
+  private boolean isFileTypeAcceptable(String fileType) {
     try {
-      String probeContentType = Files.probeContentType(Paths.get(url));
-      return FILE_EXTENSION_WHITELIST.contains(probeContentType)
-          && givenExtensionEqualsProbe(fileType, probeContentType);
+      Tika tika = new Tika();
+      String mimeType = tika.detect(loadedFile);
+
+      return FILE_EXTENSION_WHITELIST.contains(mimeType)
+          && givenExtensionEqualsProbe(fileType, mimeType);
+
     } catch (IOException e) {
       return false;
     }
@@ -37,15 +42,18 @@ public class FilePreprocessingFilter implements DocumentPreprocessingFilter {
 
   private boolean isValidFilePath(String filePath) {
     try {
-      Path path = Paths.get(BASE_PATH + filePath).normalize();
-      log.debug("Attempt to validate new file path {}", path);
+      log.debug("Attempt to validate new file {}", filePath);
 
-      if (path.toString().contains("..")) {
+      if (filePath.contains("..")) {
         return false;
       }
 
-      return Files.exists(path) && Files.isReadable(path);
+      ClassLoader classLoader = getClass().getClassLoader();
+      loadedFile = new File(classLoader.getResource(BASE_PATH + filePath).getFile());
+
+      return Files.exists(loadedFile.toPath()) && Files.isReadable(loadedFile.toPath());
     } catch (InvalidPathException | NullPointerException exception) {
+      log.error("Pre processing filter failed with exception: {}", exception);
       return false;
     }
   }
