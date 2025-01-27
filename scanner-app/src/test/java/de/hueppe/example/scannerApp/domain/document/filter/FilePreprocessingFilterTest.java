@@ -13,7 +13,7 @@ class FilePreprocessingFilterTest {
 
   @Test
   void should_fail_on_missing_file() {
-    assertThat(fileFilter.validate("application/pdf", "invalid_mime.pdf")).isFalse();
+    assertThat(fileFilter.validate("application/pdf", "unknown_file.pdf")).isFalse();
   }
 
   @Test

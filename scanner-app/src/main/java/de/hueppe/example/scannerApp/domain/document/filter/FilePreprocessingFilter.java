@@ -53,7 +53,7 @@ public class FilePreprocessingFilter implements DocumentPreprocessingFilter {
 
       return Files.exists(loadedFile.toPath()) && Files.isReadable(loadedFile.toPath());
     } catch (InvalidPathException | NullPointerException exception) {
-      log.error("Pre processing filter failed with exception: {}", exception);
+      log.error("Pre processing filter failed with exception: {}", exception.getMessage());
       return false;
     }
   }

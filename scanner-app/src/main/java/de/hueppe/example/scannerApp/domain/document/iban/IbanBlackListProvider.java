@@ -1,6 +1,7 @@
 package de.hueppe.example.scannerApp.domain.document.iban;
 
 public interface IbanBlackListProvider {
-  void addIban(String iban);
-  boolean isBlacklisted(String iban);
+  void addIban(Iban iban);
+  boolean isBlacklisted(Iban iban);
+  void clear();
 }

@@ -11,12 +11,17 @@ public class InMemoryIbanBlackListProvider implements IbanBlackListProvider {
   private final Set<String> blackList = new HashSet<>();
 
   @Override
-  public void addIban(String iban) {
-    blackList.add(iban);
+  public void addIban(Iban iban) {
+    blackList.add(iban.getValue());
   }
 
   @Override
-  public boolean isBlacklisted(String iban) {
-    return blackList.contains(iban);
+  public boolean isBlacklisted(Iban iban) {
+    return blackList.contains(iban.getValue());
+  }
+
+  @Override
+  public void clear() {
+    blackList.clear();
   }
 }
