@@ -19,25 +19,23 @@ import java.util.List;
 public class FilePreprocessingFilter implements DocumentPreprocessingFilter {
 
   public static final List<String> FILE_EXTENSION_WHITELIST = List.of("application/pdf");
-  private static final String BASE_PATH = "testData/";
+  public static final String BASE_PATH = "testData/";
 
   private final MimeTypeDetector mimeTypeDetector;
 
   private File loadedFile;
 
   @Override
-  public boolean validate(String fileType, String url) {
-    return isValidFilePath(url)
-        && probeMimeType(fileType);
+  public void validate(String fileType, String url) {
+    if (!isValidFilePath(url) || !probeMimeType(fileType)) {
+      throw new IllegalStateException("Invalid document mime type");
+    }
   }
 
   private boolean probeMimeType(String fileType) {
     try {
       String mimeType = mimeTypeDetector.detect(loadedFile);
-
-      return FILE_EXTENSION_WHITELIST.contains(mimeType)
-          && givenExtensionEqualsProbe(fileType, mimeType);
-
+      return FILE_EXTENSION_WHITELIST.contains(mimeType);
     } catch (IOException e) {
       return false;
     }
@@ -47,6 +45,8 @@ public class FilePreprocessingFilter implements DocumentPreprocessingFilter {
     try {
       log.debug("Attempt to validate new file {}", filePath);
 
+      //TODO: Improve check on path traversal
+      // Consider throwing custom exception and catch it to set CheckResultEvent.StateEnum.SUSPICIOUS
       if (filePath.contains("..")) {
         return false;
       }
@@ -59,10 +59,5 @@ public class FilePreprocessingFilter implements DocumentPreprocessingFilter {
       log.error("Pre processing filter failed with exception: {}", exception.getMessage());
       return false;
     }
-  }
-
-  private boolean givenExtensionEqualsProbe(String fileType, String probeContentType) {
-    log.debug("Comparing {} with {}", fileType, probeContentType);
-    return fileType.equals(probeContentType);
   }
 }

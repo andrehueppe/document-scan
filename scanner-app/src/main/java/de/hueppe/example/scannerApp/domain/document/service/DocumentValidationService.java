@@ -2,8 +2,9 @@ package de.hueppe.example.scannerApp.domain.document.service;
 
 import com.sdase.malware.scanner.streaming.model.v1.CheckEvent;
 import com.sdase.malware.scanner.streaming.model.v1.CheckResultEvent;
+import de.hueppe.example.scannerApp.domain.document.check.DocumentContentCheck;
 import de.hueppe.example.scannerApp.domain.document.filter.DocumentPreprocessingFilter;
-import de.hueppe.example.scannerApp.domain.document.iban.IbanBlackListHolder;
+import de.hueppe.example.scannerApp.domain.document.parser.DocumentParser;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
@@ -18,8 +19,10 @@ import java.util.Set;
 public class DocumentValidationService {
 
   private final Set<DocumentPreprocessingFilter> filterList;
+  private final Set<DocumentContentCheck> documentCheckList;
+
   private final ApplicationEventPublisher eventPublisher;
-  private final IbanBlackListHolder ibanBlackListHolder;
+  private final DocumentParser documentParser;
 
   @EventListener
   public void handleEvent(CheckEvent event) {
@@ -32,41 +35,29 @@ public class DocumentValidationService {
         .name(url)
         .build();
 
+    /*
+      Pre Processing steps
+     */
     try {
-      boolean result = filterList.stream()
-          .map(filter -> filter.validate(fileType, url))
-          .anyMatch(filterResult -> {
-            if (!filterResult) {
-              resultEvent.toBuilder()
-                  .state(CheckResultEvent.StateEnum.IGNORED)
-                  .details("Document ignored checks due to pre processing error.")
-                  .build();
-
-              log.debug("Preprocessing filter failed for: {}", url);
-              return true;
-            }
-            resultEvent.toBuilder()
-                .state(CheckResultEvent.StateEnum.OK)
-                .details("Document passed pre processing checks.")
-                .build();
-
-            return false;
-          });
-
-      if (!result) {
-        log.info("Document check stopped for {} due to previous errors.", url);
-        return;
-      }
-
-      //TODO: Implement further parsing/processing of given document
-      // - Make use of state CheckResultEvent.StateEnum.SUSPICIOUS
-      // - Make use of IbanBlackListHolder
-
+      documentParser.init(url);
+      filterList.forEach(check -> check.validate(fileType, url));
     } catch (Exception exception) {
-      log.error("Processing of document {} failed.", url);
       resultEvent.toBuilder()
           .state(CheckResultEvent.StateEnum.ERROR)
-          .details("Document failed due to technical error.")
+          .details("Document ignored checks due to pre processing error: " + exception.getMessage())
+          .build();
+    }
+
+    /*
+      Content processing steps
+     */
+    try {
+      documentParser.init(url);
+      documentCheckList.forEach(check -> check.check(documentParser));
+    } catch (Exception exception) {
+      resultEvent.toBuilder()
+          .state(CheckResultEvent.StateEnum.SUSPICIOUS)
+          .details("Document content check failed: " + exception.getMessage())
           .build();
     }
 
