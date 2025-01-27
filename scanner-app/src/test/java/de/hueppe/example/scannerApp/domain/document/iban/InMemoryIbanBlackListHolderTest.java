@@ -10,9 +10,9 @@ import java.util.stream.Stream;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-class InMemoryIbanBlackListProviderTest {
+class InMemoryIbanBlackListHolderTest {
 
-  private final InMemoryIbanBlackListProvider blackListProvider = new InMemoryIbanBlackListProvider();
+  private final InMemoryIbanBlackListHolder blackListProvider = new InMemoryIbanBlackListHolder();
 
   static Stream<Arguments> provideValidIbanTestData() {
     return Stream.of(

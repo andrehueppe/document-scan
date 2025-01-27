@@ -6,7 +6,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Component
-public class InMemoryIbanBlackListProvider implements IbanBlackListProvider {
+public class InMemoryIbanBlackListHolder implements IbanBlackListHolder {
 
   private final Set<String> blackList = new HashSet<>();
 

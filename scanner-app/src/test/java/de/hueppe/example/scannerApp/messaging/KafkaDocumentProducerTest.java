@@ -8,6 +8,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.kafka.core.KafkaTemplate;
 
+import static com.sdase.malware.scanner.streaming.model.v1.CheckResultEvent.*;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 
@@ -28,7 +29,7 @@ class KafkaDocumentProducerTest {
 
   @Test
   void should_emmit_kafka_event() {
-    CheckResultEvent resultEvent = new CheckResultEvent(CheckResultEvent.StateEnum.OK, "test-document", "Nothing found");
+    CheckResultEvent resultEvent = new CheckResultEvent(StateEnum.OK, "test-document", "Nothing found");
     producer.handleEvent(resultEvent);
 
     verify(kafkaTemplate).send(eq(TOPIC_NAME), eq(resultEvent));

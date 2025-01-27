@@ -3,7 +3,7 @@ package de.hueppe.example.scannerApp.domain.document.service;
 import com.sdase.malware.scanner.streaming.model.v1.CheckEvent;
 import com.sdase.malware.scanner.streaming.model.v1.CheckResultEvent;
 import de.hueppe.example.scannerApp.domain.document.filter.DocumentPreprocessingFilter;
-import de.hueppe.example.scannerApp.domain.document.iban.IbanBlackListProvider;
+import de.hueppe.example.scannerApp.domain.document.iban.IbanBlackListHolder;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
@@ -19,7 +19,7 @@ public class DocumentValidationService {
 
   private final Set<DocumentPreprocessingFilter> filterList;
   private final ApplicationEventPublisher eventPublisher;
-  private final IbanBlackListProvider ibanBlackListProvider;
+  private final IbanBlackListHolder ibanBlackListHolder;
 
   @EventListener
   public void handleEvent(CheckEvent event) {
@@ -49,6 +49,7 @@ public class DocumentValidationService {
                 .state(CheckResultEvent.StateEnum.OK)
                 .details("Document passed pre processing checks.")
                 .build();
+
             return false;
           });
 
@@ -59,7 +60,7 @@ public class DocumentValidationService {
 
       //TODO: Implement further parsing/processing of given document
       // - Make use of state CheckResultEvent.StateEnum.SUSPICIOUS
-      // - Make use of IbanBlackListProvider
+      // - Make use of IbanBlackListHolder
 
     } catch (Exception exception) {
       log.error("Processing of document {} failed.", url);

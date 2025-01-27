@@ -24,11 +24,12 @@ public class FilePreprocessingFilter implements DocumentPreprocessingFilter {
   @Override
   public boolean validate(String fileType, String url) {
     return isValidFilePath(url)
-        && isFileTypeAcceptable(fileType);
+        && probeMimeType(fileType);
   }
 
-  private boolean isFileTypeAcceptable(String fileType) {
+  private boolean probeMimeType(String fileType) {
     try {
+      //TODO: create adapter and hide 3rd party API from here
       Tika tika = new Tika();
       String mimeType = tika.detect(loadedFile);
 
