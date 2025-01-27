@@ -1,5 +1,6 @@
 package de.hueppe.example.scannerApp.domain.document.filter;
 
+import de.hueppe.example.scannerApp.domain.document.filter.FilePreprocessingFilter.PathTraversalException;
 import de.hueppe.example.scannerApp.domain.document.mime.TikaMimeTypeDetector;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -22,7 +23,6 @@ class FilePreprocessingFilterTest {
   static Stream<Arguments> provideFileParameters() {
     return Stream.of(
         Arguments.of("application/pdf", "unknown_file.pdf"),
-        Arguments.of("application/pdf", "../../secret.file"),
         Arguments.of("application/pdf", "invalid_mime.pdf")
     );
   }
@@ -30,11 +30,19 @@ class FilePreprocessingFilterTest {
   @ParameterizedTest
   @MethodSource("provideFileParameters")
   void should_fail_on_invalid_mime_type(String givenMimeType, String givenFileName) {
-    IllegalStateException illegalStateException = assertThrows(IllegalStateException.class, () -> {
-      fileFilter.validate(givenMimeType, givenFileName);
-    });
+    IllegalStateException illegalStateException = assertThrows(IllegalStateException.class,
+        () -> fileFilter.validate(givenMimeType, givenFileName));
 
     assertThat(illegalStateException.getMessage()).isEqualTo("Invalid document mime type");
+  }
+
+  @Test
+  void should_fail_on_path_traversal() {
+    String url = "../../secret.file";
+    PathTraversalException pathTraversalException = assertThrows(PathTraversalException.class,
+        () -> fileFilter.validate("application/pdf", url));
+
+    assertThat(pathTraversalException.getMessage()).isEqualTo("Path traversal detected: " + url);
   }
 
   @Test

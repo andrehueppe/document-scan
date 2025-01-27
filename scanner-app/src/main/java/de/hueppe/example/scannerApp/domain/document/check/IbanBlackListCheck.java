@@ -17,7 +17,7 @@ public class IbanBlackListCheck implements DocumentContentCheck {
     documentParser.extractIban()
         .map(iban -> {
           if (ibanBlackListHolder.isBlacklisted(iban)) {
-            throw new IllegalStateException("IBAN is blacklisted: " + iban);
+            throw new IllegalStateException("IBAN is blacklisted: " + iban.getValue());
           }
           return false;
         })

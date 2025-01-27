@@ -4,6 +4,7 @@ import com.sdase.malware.scanner.streaming.model.v1.CheckEvent;
 import com.sdase.malware.scanner.streaming.model.v1.CheckResultEvent;
 import de.hueppe.example.scannerApp.domain.document.check.DocumentContentCheck;
 import de.hueppe.example.scannerApp.domain.document.filter.DocumentPreprocessingFilter;
+import de.hueppe.example.scannerApp.domain.document.filter.FilePreprocessingFilter;
 import de.hueppe.example.scannerApp.domain.document.parser.DocumentParser;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -41,6 +42,11 @@ public class DocumentValidationService {
     try {
       documentParser.init(url);
       filterList.forEach(check -> check.validate(fileType, url));
+    } catch (FilePreprocessingFilter.PathTraversalException pathTraversalException) {
+      resultEvent.toBuilder()
+          .state(CheckResultEvent.StateEnum.SUSPICIOUS)
+          .details("Document ignored checks due to pre processing error: " + pathTraversalException.getMessage())
+          .build();
     } catch (Exception exception) {
       resultEvent.toBuilder()
           .state(CheckResultEvent.StateEnum.ERROR)

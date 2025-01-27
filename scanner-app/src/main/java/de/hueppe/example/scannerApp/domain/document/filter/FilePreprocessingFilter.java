@@ -45,10 +45,9 @@ public class FilePreprocessingFilter implements DocumentPreprocessingFilter {
     try {
       log.debug("Attempt to validate new file {}", filePath);
 
-      //TODO: Improve check on path traversal
-      // Consider throwing custom exception and catch it to set CheckResultEvent.StateEnum.SUSPICIOUS
+      //TODO: Improve checks on path traversal
       if (filePath.contains("..")) {
-        return false;
+        throw new PathTraversalException("Path traversal detected: " + filePath);
       }
 
       ClassLoader classLoader = getClass().getClassLoader();
@@ -58,6 +57,12 @@ public class FilePreprocessingFilter implements DocumentPreprocessingFilter {
     } catch (InvalidPathException | NullPointerException exception) {
       log.error("Pre processing filter failed with exception: {}", exception.getMessage());
       return false;
+    }
+  }
+
+  public static class PathTraversalException extends RuntimeException {
+    public PathTraversalException(String message) {
+      super(message);
     }
   }
 }
