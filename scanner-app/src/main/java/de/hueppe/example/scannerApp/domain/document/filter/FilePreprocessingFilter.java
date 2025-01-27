@@ -1,7 +1,8 @@
 package de.hueppe.example.scannerApp.domain.document.filter;
 
+import de.hueppe.example.scannerApp.domain.document.mime.MimeTypeDetector;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.tika.Tika;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
@@ -14,10 +15,13 @@ import java.util.List;
 @Slf4j
 @Order(1)
 @Component
+@RequiredArgsConstructor
 public class FilePreprocessingFilter implements DocumentPreprocessingFilter {
 
   public static final List<String> FILE_EXTENSION_WHITELIST = List.of("application/pdf");
   private static final String BASE_PATH = "testData/";
+
+  private final MimeTypeDetector mimeTypeDetector;
 
   private File loadedFile;
 
@@ -29,9 +33,7 @@ public class FilePreprocessingFilter implements DocumentPreprocessingFilter {
 
   private boolean probeMimeType(String fileType) {
     try {
-      //TODO: create adapter and hide 3rd party API from here
-      Tika tika = new Tika();
-      String mimeType = tika.detect(loadedFile);
+      String mimeType = mimeTypeDetector.detect(loadedFile);
 
       return FILE_EXTENSION_WHITELIST.contains(mimeType)
           && givenExtensionEqualsProbe(fileType, mimeType);
