@@ -33,7 +33,7 @@ public class DocumentValidationService {
 
   @EventListener
   public void handleEvent(CheckEvent event) {
-    log.info("Received new DocumentCheckEvent: {}", event);
+    log.debug("Received new DocumentCheckEvent: {}", event);
     processDocument(event.getUrl());
   }
 
@@ -58,10 +58,11 @@ public class DocumentValidationService {
       } catch (Exception exception) {
         eventBuilder
             .state(StateEnum.ERROR)
-            .details(PRE_PROCESSING_ERROR_MESSAGE + exception.getMessage())
-            .build();
+            .details(PRE_PROCESSING_ERROR_MESSAGE + exception.getMessage());
       } finally {
-        eventPublisher.publishEvent(eventBuilder.build());
+        CheckResultEvent resultEvent = eventBuilder.build();
+        log.info("Finished filter: {}", resultEvent);
+        eventPublisher.publishEvent(resultEvent);
       }
     });
 
@@ -77,15 +78,15 @@ public class DocumentValidationService {
         check.perform(documentParser);
         eventBuilder
             .state(StateEnum.OK)
-            .details(PASSED_MESSAGE)
-            .build();
+            .details(PASSED_MESSAGE);
       } catch (Exception exception) {
         eventBuilder
             .state(StateEnum.SUSPICIOUS)
-            .details(CONTENT_CHECK_FAILED_MESSAGE + exception.getMessage())
-            .build();
+            .details(CONTENT_CHECK_FAILED_MESSAGE + exception.getMessage());
       } finally {
-        eventPublisher.publishEvent(eventBuilder.build());
+        CheckResultEvent resultEvent = eventBuilder.build();
+        log.info("Finished check: {}", resultEvent);
+        eventPublisher.publishEvent(resultEvent);
       }
     });
 

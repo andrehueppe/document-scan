@@ -13,7 +13,7 @@ import static org.mockito.Mockito.verify;
 
 @SpringBootTest
 @TestPropertySource(properties = {
-    "kafka.enabled=false"
+    "spring.kafka.enabled=false"
 })
 class KafkaDocumentConsumerIT {
 

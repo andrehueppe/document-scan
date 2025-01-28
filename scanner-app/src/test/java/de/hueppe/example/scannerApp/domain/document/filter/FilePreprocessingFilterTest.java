@@ -23,7 +23,7 @@ class FilePreprocessingFilterTest {
   static Stream<Arguments> provideFileParameters() {
     return Stream.of(
         Arguments.of("unknown_file.pdf"),
-        Arguments.of("invalid_mime.pdf")
+        Arguments.of("invalid_mime.txt")
     );
   }
 
@@ -48,7 +48,7 @@ class FilePreprocessingFilterTest {
   @Test
   void should_pass_on_valid_file() {
     try {
-      fileFilter.validate("valid.pdf");
+      fileFilter.validate("Testdaten_Rechnungseinreichung.pdf");
     } catch (Exception exception) {
       fail("Caught unexpected exception: " + exception.getMessage());
     }

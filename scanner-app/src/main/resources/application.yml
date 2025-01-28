@@ -1,5 +1,21 @@
-kafka:
-  group: scanner-group
-  topics:
-    documents:
-      v1: demo-documents-v1
+server.port: 8090
+
+spring:
+  application-name: scanner-app
+
+  kafka:
+    bootstrap-servers: localhost:9092
+    consumer:
+      properties:
+        spring.json.trusted.packages: "com.sdase.malware.scanner.streaming.model.v1"
+#        spring.kafka.trusted.packages: "com.sdase.malware.scanner.streaming.model.v1"
+#        spring.deserializer.trusted.packages: "com.sdase.malware.scanner.streaming.model.v1"
+      group-id: scanner-group
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+    topics:
+      documents:
+        v1: demo-documents-v1

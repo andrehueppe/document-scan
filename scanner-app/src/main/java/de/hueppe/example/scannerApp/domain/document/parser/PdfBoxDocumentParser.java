@@ -6,8 +6,8 @@ import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.text.PDFTextStripper;
 import org.springframework.stereotype.Component;
 
-import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -16,7 +16,7 @@ import static de.hueppe.example.scannerApp.domain.document.filter.FilePreprocess
 
 @Slf4j
 @Component
-public class  PdfBoxDocumentParser implements DocumentParser {
+public class PdfBoxDocumentParser implements DocumentParser {
 
   public static final String IBAN_REGEX = "\\b[A-Z]{2}\\d{2}(?:\\s\\d{2,4}){4,7}\\b";
   public static final String FAILED_TO_INITIALIZE_MESSAGE = "Failed to initialize document for content processing: ";
@@ -29,9 +29,13 @@ public class  PdfBoxDocumentParser implements DocumentParser {
   public void init(String filePath) {
     try {
       ClassLoader classLoader = getClass().getClassLoader();
-      File loadedFile = new File(classLoader.getResource(BASE_PATH + filePath).getFile());
-      document = PDDocument.load(loadedFile);
+      InputStream inputStream = classLoader.getResourceAsStream(BASE_PATH + filePath);
 
+      if (inputStream == null) {
+        throw new IllegalArgumentException("File not found: " + BASE_PATH + filePath);
+      }
+
+      document = PDDocument.load(inputStream);
       stripper = new PDFTextStripper();
       documentAsText = stripper.getText(document);
     } catch (Exception exception) {

@@ -6,9 +6,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
-import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
+import java.io.InputStream;
 import java.nio.file.InvalidPathException;
 import java.util.List;
 
@@ -18,13 +17,13 @@ import java.util.List;
 @RequiredArgsConstructor
 public class FilePreprocessingFilter implements DocumentPreprocessingFilter {
 
-  public static final List<String> FILE_EXTENSION_WHITELIST = List.of("application/pdf");
+  public static final List<String> FILE_EXTENSION_WHITELIST = List.of("application/pdf", "application/octet-stream");
   public static final String BASE_PATH = "testData/";
   public static final String FILTER_NAME = "File preprocessing filter";
 
   private final MimeTypeDetector mimeTypeDetector;
 
-  private File loadedFile;
+  private InputStream resourceStream;
 
   @Override
   public String getName() {
@@ -40,7 +39,7 @@ public class FilePreprocessingFilter implements DocumentPreprocessingFilter {
 
   private boolean probeMimeType() {
     try {
-      String mimeType = mimeTypeDetector.detect(loadedFile);
+      String mimeType = mimeTypeDetector.detect(resourceStream);
       return FILE_EXTENSION_WHITELIST.contains(mimeType);
     } catch (IOException e) {
       return false;
@@ -57,10 +56,17 @@ public class FilePreprocessingFilter implements DocumentPreprocessingFilter {
       }
 
       ClassLoader classLoader = getClass().getClassLoader();
-      loadedFile = new File(classLoader.getResource(BASE_PATH + filePath).getFile());
+      InputStream resourceStream = classLoader.getResourceAsStream(BASE_PATH + filePath);
 
-      return Files.exists(loadedFile.toPath()) && Files.isReadable(loadedFile.toPath());
-    } catch (InvalidPathException | NullPointerException exception) {
+      if (resourceStream == null) {
+        log.error("Resource not found: {}", BASE_PATH + filePath);
+        return false;
+      }
+
+      try (resourceStream) {
+        return true;
+      }
+    } catch (InvalidPathException | NullPointerException | IOException exception) {
       log.error("Pre processing filter failed with exception: {}", exception.getMessage());
       return false;
     }
