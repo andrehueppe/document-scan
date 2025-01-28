@@ -22,16 +22,16 @@ class FilePreprocessingFilterTest {
 
   static Stream<Arguments> provideFileParameters() {
     return Stream.of(
-        Arguments.of("application/pdf", "unknown_file.pdf"),
-        Arguments.of("application/pdf", "invalid_mime.pdf")
+        Arguments.of("unknown_file.pdf"),
+        Arguments.of("invalid_mime.pdf")
     );
   }
 
   @ParameterizedTest
   @MethodSource("provideFileParameters")
-  void should_fail_on_invalid_mime_type(String givenMimeType, String givenFileName) {
+  void should_fail_on_invalid_mime_type(String givenFileName) {
     IllegalStateException illegalStateException = assertThrows(IllegalStateException.class,
-        () -> fileFilter.validate(givenMimeType, givenFileName));
+        () -> fileFilter.validate(givenFileName));
 
     assertThat(illegalStateException.getMessage()).isEqualTo("Invalid document mime type");
   }
@@ -40,7 +40,7 @@ class FilePreprocessingFilterTest {
   void should_fail_on_path_traversal() {
     String url = "../../secret.file";
     PathTraversalException pathTraversalException = assertThrows(PathTraversalException.class,
-        () -> fileFilter.validate("application/pdf", url));
+        () -> fileFilter.validate(url));
 
     assertThat(pathTraversalException.getMessage()).isEqualTo("Path traversal detected: " + url);
   }
@@ -48,7 +48,7 @@ class FilePreprocessingFilterTest {
   @Test
   void should_pass_on_valid_file() {
     try {
-      fileFilter.validate("application/pdf", "valid.pdf");
+      fileFilter.validate("valid.pdf");
     } catch (Exception exception) {
       fail("Caught unexpected exception: " + exception.getMessage());
     }

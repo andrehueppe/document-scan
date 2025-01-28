@@ -34,7 +34,7 @@ class IbanBlackListCheckTest {
     when(documentParser.extractIban()).thenReturn(Optional.empty());
 
     IllegalStateException illegalStateException = assertThrows(IllegalStateException.class, () -> {
-      ibanBlackListCheck.check(documentParser);
+      ibanBlackListCheck.perform(documentParser);
     });
     assertThat(illegalStateException.getMessage()).isEqualTo("Failed to extract IBAN from document");
   }
@@ -46,7 +46,7 @@ class IbanBlackListCheckTest {
     when(ibanBlackListHolder.isBlacklisted(eq(new Iban(testIban)))).thenReturn(true);
 
     IllegalStateException illegalStateException = assertThrows(IllegalStateException.class, () -> {
-      ibanBlackListCheck.check(documentParser);
+      ibanBlackListCheck.perform(documentParser);
     });
     assertThat(illegalStateException.getMessage()).isEqualTo("IBAN is blacklisted: " + testIban);
   }
@@ -58,7 +58,7 @@ class IbanBlackListCheckTest {
     when(ibanBlackListHolder.isBlacklisted(eq(new Iban(testIban)))).thenReturn(false);
 
     try {
-      ibanBlackListCheck.check(documentParser);
+      ibanBlackListCheck.perform(documentParser);
     } catch (Exception exception) {
       fail("Caught unexpected exception: " + exception.getMessage());
     }

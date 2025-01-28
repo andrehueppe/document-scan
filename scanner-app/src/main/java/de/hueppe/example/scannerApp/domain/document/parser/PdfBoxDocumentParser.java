@@ -16,24 +16,28 @@ import static de.hueppe.example.scannerApp.domain.document.filter.FilePreprocess
 
 @Slf4j
 @Component
-public class PdfBoxDocumentParser implements DocumentParser {
+public class  PdfBoxDocumentParser implements DocumentParser {
 
-  public static final String IBAN_REGEX = "\\b[A-Z]{2}\\d{2}[A-Z0-9]{4,30}\\b";
+  public static final String IBAN_REGEX = "\\b[A-Z]{2}\\d{2}(?:\\s\\d{2,4}){4,7}\\b";
+  public static final String FAILED_TO_INITIALIZE_MESSAGE = "Failed to initialize document for content processing: ";
+
   private PDFTextStripper stripper;
   private PDDocument document;
   private String documentAsText;
 
   @Override
-  public void init(String filePath) throws IOException {
+  public void init(String filePath) {
     try {
       ClassLoader classLoader = getClass().getClassLoader();
       File loadedFile = new File(classLoader.getResource(BASE_PATH + filePath).getFile());
       document = PDDocument.load(loadedFile);
 
-      PDFTextStripper stripper = new PDFTextStripper();
+      stripper = new PDFTextStripper();
       documentAsText = stripper.getText(document);
     } catch (Exception exception) {
-      log.error("Failed to initialize PDF document for content processing: {}", exception.getMessage());
+      String message = FAILED_TO_INITIALIZE_MESSAGE + exception.getMessage();
+      log.error(message);
+      throw new IllegalStateException(message);
     }
   }
 
@@ -49,7 +53,11 @@ public class PdfBoxDocumentParser implements DocumentParser {
     return Optional.empty();
   }
 
-  public void close() throws IOException {
-    document.close();
+  public void close() {
+    try {
+      document.close();
+    } catch (IOException exception) {
+      log.warn("Failed to close document");
+    }
   }
 }

@@ -20,19 +20,25 @@ public class FilePreprocessingFilter implements DocumentPreprocessingFilter {
 
   public static final List<String> FILE_EXTENSION_WHITELIST = List.of("application/pdf");
   public static final String BASE_PATH = "testData/";
+  public static final String FILTER_NAME = "File preprocessing filter";
 
   private final MimeTypeDetector mimeTypeDetector;
 
   private File loadedFile;
 
   @Override
-  public void validate(String fileType, String url) {
-    if (!isValidFilePath(url) || !probeMimeType(fileType)) {
+  public String getName() {
+    return FILTER_NAME;
+  }
+
+  @Override
+  public void validate(String url) {
+    if (!isValidFilePath(url) || !probeMimeType()) {
       throw new IllegalStateException("Invalid document mime type");
     }
   }
 
-  private boolean probeMimeType(String fileType) {
+  private boolean probeMimeType() {
     try {
       String mimeType = mimeTypeDetector.detect(loadedFile);
       return FILE_EXTENSION_WHITELIST.contains(mimeType);

@@ -11,9 +11,15 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class IbanBlackListCheck implements DocumentContentCheck {
 
+  public static final String CHECK_NAME = "IBAN Black list check";
   private final IbanBlackListHolder ibanBlackListHolder;
 
-  public void check(DocumentParser documentParser) {
+  @Override
+  public String getName() {
+    return CHECK_NAME;
+  }
+
+  public void perform(DocumentParser documentParser) {
     documentParser.extractIban()
         .map(iban -> {
           if (ibanBlackListHolder.isBlacklisted(iban)) {

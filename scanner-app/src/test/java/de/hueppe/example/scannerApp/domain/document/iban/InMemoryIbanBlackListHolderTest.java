@@ -43,7 +43,7 @@ class InMemoryIbanBlackListHolderTest {
         () -> blackListProvider.isBlacklisted(new Iban(iban)));
 
     assertThat(illegalArgumentException.getMessage())
-        .isEqualTo("Invalid IBAN checksum: " + iban);
+        .isEqualTo("IBAN must be between 15 and 34 characters long: " + iban);
   }
 
   @ParameterizedTest
