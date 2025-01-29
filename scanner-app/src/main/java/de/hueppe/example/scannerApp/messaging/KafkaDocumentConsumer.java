@@ -14,7 +14,7 @@ public class KafkaDocumentConsumer {
 
     private final ApplicationEventPublisher eventPublisher;
 
-    @KafkaListener(topics = "${spring.kafka.topics.documents.v1}", groupId = "${spring.kafka.consumer.group-id}")
+    @KafkaListener(topics = "${spring.kafka.topics.document-checks.v1}", groupId = "${spring.kafka.consumer.group-id}")
     public void consumeDocument(CheckEvent event) {
       log.info("Received document event: {}", event);
       eventPublisher.publishEvent(new CheckEvent(event.getUrl(), event.getFileType()));

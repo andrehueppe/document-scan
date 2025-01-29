@@ -4,7 +4,7 @@ spring:
   application-name: scanner-app
 
   kafka:
-    bootstrap-servers: localhost:9092
+    bootstrap-servers: localhost:9093
     consumer:
       properties:
         spring.json.trusted.packages: "com.sdase.malware.scanner.streaming.model.v1"
@@ -15,5 +15,7 @@ spring:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
     topics:
-      documents:
+      document-checks:
         v1: demo-documents-v1
+      document-results:
+        v1: demo-document-results-v1

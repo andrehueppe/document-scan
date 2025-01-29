@@ -14,7 +14,7 @@ import org.springframework.kafka.core.KafkaTemplate;
 @ConditionalOnProperty(name = "spring.kafka.enabled", matchIfMissing = true)
 public class KafkaConfig {
 
-  @Value("${spring.kafka.topics.documents.v1}")
+  @Value("${spring.kafka.topics.document-results.v1}")
   private String topicName;
 
   @Bean
