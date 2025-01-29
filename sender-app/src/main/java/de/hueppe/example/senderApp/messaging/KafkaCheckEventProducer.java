@@ -12,7 +12,7 @@ public class KafkaCheckEventProducer {
 
     private final KafkaTemplate<String, CheckEvent> kafkaTemplate;
 
-    @Value("${spring.kafka.topics.documents.v1}")
+    @Value("${spring.kafka.topics.document-checks.v1}")
     private String topicName;
 
     public void sendCheckEvent(CheckEvent checkEvent) {

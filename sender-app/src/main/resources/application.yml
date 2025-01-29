@@ -8,5 +8,11 @@ spring:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
     topics:
-      documents:
+      document-checks:
         v1: demo-documents-v1
+
+logging:
+  level:
+    root: INFO
+    org.apache.kafka.common.utils: WARN
+    org.apache.kafka.clients: WARN

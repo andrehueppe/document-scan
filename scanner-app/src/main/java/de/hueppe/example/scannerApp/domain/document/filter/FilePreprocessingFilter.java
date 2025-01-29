@@ -48,7 +48,7 @@ public class FilePreprocessingFilter implements DocumentPreprocessingFilter {
 
   private boolean isValidFilePath(String filePath) {
     try {
-      log.debug("Attempt to validate new file {}", filePath);
+      log.info("Attempt to validate new file {}", filePath);
 
       //TODO: Improve checks on path traversal
       if (filePath.contains("..")) {

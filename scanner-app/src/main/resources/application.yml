@@ -19,3 +19,9 @@ spring:
         v1: demo-documents-v1
       document-results:
         v1: demo-document-results-v1
+
+logging:
+  level:
+    root: INFO
+    org.apache.kafka.common.utils: WARN
+    org.apache.kafka.clients: WARN
