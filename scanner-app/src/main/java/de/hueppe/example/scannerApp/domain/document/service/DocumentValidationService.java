@@ -43,28 +43,31 @@ public class DocumentValidationService {
     /*
       Pre Processing steps
      */
-    filterList.forEach(filter -> {
+    boolean hasError = filterList.stream().anyMatch(filter -> {
       eventBuilder.name(filter.getName());
 
       try {
         filter.validate(url);
-        eventBuilder
-            .state(StateEnum.OK)
-            .details(PASSED_MESSAGE);
+        eventBuilder.state(StateEnum.OK).details(PASSED_MESSAGE);
       } catch (PathTraversalException pathTraversalException) {
-        eventBuilder
-            .state(StateEnum.SUSPICIOUS)
-            .details(PRE_PROCESSING_ERROR_MESSAGE + pathTraversalException.getMessage());
+        eventBuilder.state(StateEnum.SUSPICIOUS).details(PRE_PROCESSING_ERROR_MESSAGE + pathTraversalException.getMessage());
+        return true;
       } catch (Exception exception) {
-        eventBuilder
-            .state(StateEnum.ERROR)
-            .details(PRE_PROCESSING_ERROR_MESSAGE + exception.getMessage());
-      } finally {
-        CheckResultEvent resultEvent = eventBuilder.build();
-        log.info("Finished filter: {}", resultEvent);
-        eventPublisher.publishEvent(resultEvent);
+        eventBuilder.state(StateEnum.ERROR).details(PRE_PROCESSING_ERROR_MESSAGE + exception.getMessage());
+        return true;
       }
+
+      return false;
     });
+
+    CheckResultEvent filterResultEvent = eventBuilder.build();
+    log.info("Finished filter: {}", filterResultEvent);
+    eventPublisher.publishEvent(filterResultEvent);
+
+    if (hasError) {
+      documentParser.close();
+      return;
+    }
 
     /*
       Content processing steps
@@ -84,9 +87,9 @@ public class DocumentValidationService {
             .state(StateEnum.SUSPICIOUS)
             .details(CONTENT_CHECK_FAILED_MESSAGE + exception.getMessage());
       } finally {
-        CheckResultEvent resultEvent = eventBuilder.build();
-        log.info("Finished check: {}", resultEvent);
-        eventPublisher.publishEvent(resultEvent);
+        CheckResultEvent checkResultEvent = eventBuilder.build();
+        log.info("Finished check: {}", checkResultEvent);
+        eventPublisher.publishEvent(checkResultEvent);
       }
     });
 

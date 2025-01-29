@@ -39,7 +39,6 @@ services:
     networks:
       - app-network
     environment:
-      SPRING_PROFILES_ACTIVE: docker
       KAFKA_BOOTSTRAP_SERVERS: kafka:9092
 
   sender-app:
@@ -54,7 +53,6 @@ services:
     networks:
       - app-network
     environment:
-      SPRING_PROFILES_ACTIVE: docker
       KAFKA_BOOTSTRAP_SERVERS: kafka:9092
 
 networks:

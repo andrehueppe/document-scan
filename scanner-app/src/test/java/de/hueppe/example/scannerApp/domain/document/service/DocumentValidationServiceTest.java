@@ -38,8 +38,6 @@ class DocumentValidationServiceTest {
 
   @BeforeEach
   void setUp() {
-    when(mockedFilter.getName()).thenReturn("Mocked Filter");
-    when(mockedCheck.getName()).thenReturn("Mocked Check");
     doNothing().when(documentParser).close();
 
     documentValidationService = new DocumentValidationService(
@@ -53,12 +51,15 @@ class DocumentValidationServiceTest {
   void should_succeed_on_valid_document() {
     String testFileType = "application/pdf";
     String testUrl = "valid.pdf";
+    when(mockedFilter.getName()).thenReturn("Mocked Filter");
+    when(mockedCheck.getName()).thenReturn("Mocked Check");
     doNothing().when(mockedFilter).validate(testUrl);
     doNothing().when(mockedCheck).perform(eq(documentParser));
 
 
     documentValidationService.handleEvent(new CheckEvent(testUrl, testFileType));
 
+    verify(eventPublisher, times(2)).publishEvent(any(CheckResultEvent.class));
     verify(eventPublisher).publishEvent(
         eq(new CheckResultEvent(CheckResultEvent.StateEnum.OK, mockedFilter.getName(), PASSED_MESSAGE)));
 
@@ -72,6 +73,7 @@ class DocumentValidationServiceTest {
   void should_fail_on_pre_processing_filter() {
     String testFileType = "application/pdf";
     String testUrl = "valid.pdf";
+    when(mockedFilter.getName()).thenReturn("Mocked Filter");
     doThrow(new IllegalStateException("Invalid document mime type"))
         .when(mockedFilter)
         .validate(testUrl);
@@ -84,6 +86,7 @@ class DocumentValidationServiceTest {
             mockedFilter.getName(),
             PRE_PROCESSING_ERROR_MESSAGE + "Invalid document mime type")));
 
+    verify(eventPublisher, times(1)).publishEvent(any(CheckResultEvent.class));
     verify(documentParser).close();
   }
 
@@ -92,13 +95,16 @@ class DocumentValidationServiceTest {
     String testFileType = "application/pdf";
     String testUrl = "valid.pdf";
     String testIban = "DE89370400440532013000";
-
+    when(mockedFilter.getName()).thenReturn("Mocked Filter");
+    when(mockedCheck.getName()).thenReturn("Mocked Check");
     doNothing().when(mockedFilter).validate(testUrl);
     doThrow(new IllegalStateException("IBAN is blacklisted: " + testIban))
         .when(mockedCheck)
         .perform(documentParser);
 
     documentValidationService.handleEvent(new CheckEvent(testUrl, testFileType));
+
+    verify(eventPublisher, times(2)).publishEvent(any(CheckResultEvent.class));
 
     verify(eventPublisher).publishEvent(
         eq(new CheckResultEvent(CheckResultEvent.StateEnum.OK, mockedFilter.getName(), PASSED_MESSAGE)));
@@ -116,12 +122,14 @@ class DocumentValidationServiceTest {
   void should_fail_on_path_traversal() {
     String testFileType = "application/pdf";
     String testUrl = "../secret.file";
-
+    when(mockedFilter.getName()).thenReturn("Mocked Filter");
     doThrow(new PathTraversalException("Path traversal detected: " + testUrl))
         .when(mockedFilter)
         .validate(testUrl);
 
     documentValidationService.handleEvent(new CheckEvent(testUrl, testFileType));
+
+    verify(eventPublisher, times(1)).publishEvent(any(CheckResultEvent.class));
 
     verify(eventPublisher).publishEvent(
         eq(new CheckResultEvent(

@@ -1,4 +1,4 @@
-server.port: 8090
+server.port: 8080
 
 spring:
   application-name: scanner-app
@@ -8,8 +8,6 @@ spring:
     consumer:
       properties:
         spring.json.trusted.packages: "com.sdase.malware.scanner.streaming.model.v1"
-#        spring.kafka.trusted.packages: "com.sdase.malware.scanner.streaming.model.v1"
-#        spring.deserializer.trusted.packages: "com.sdase.malware.scanner.streaming.model.v1"
       group-id: scanner-group
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
